@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'ToDoApp'
 ]
 
 MIDDLEWARE = [
@@ -76,11 +77,20 @@ WSGI_APPLICATION = 'ToDoList.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'maruszewskiw',
-        'USER': 'maruszewskiw',
-        'PASSWORD': 'wiktor123#@!A',
-        'HOST': '213.184.8.36',
+        'NAME': 'ToDoList',
+        'HOST': 'localhost',
+        'USER': 'root',
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'maruszewskiw',
+    #     'USER': 'student',
+    #     'PASSWORD': 'WHaaT20##.!',
+    #     'HOST': '213.184.8.36',
+    #     'PORT': '22'
+    #     # 'PORT': '3306',
+    #     # 'PORT': '443',
+    # }
 }
 
 
