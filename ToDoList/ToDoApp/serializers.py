@@ -1,11 +1,8 @@
 import string
 from datetime import datetime
-
 from rest_framework import serializers
-from ToDoApp.models import User, Task
-from ToDoApp.models import Category
-from ToDoApp.models import Room
-from ToDoApp.models import UserRoom
+from ToDoApp.models import Task, Category, Room, UserRoom, Profile
+from django.contrib.auth.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,40 +10,16 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
-    def validate_login(self, value):
-        if len(value) < 5:
-            raise serializers.ValidationError(
-                "Your login must not be less than 5 characters long!",
-            )
 
-        charset_list = [*string.ascii_letters, *string.digits]
-        if any(letter not in charset_list for letter in value):
-            raise serializers.ValidationError(
-                "Your login must not contain invalid characters (only letters and numbers)!",
-            )
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['user', 'nickname', 'avatar', 'bio']
 
     def validate_nickname(self, value):
-        if len(value) < 3:
+        if not value:
             raise serializers.ValidationError(
-                "Your nickname must not be less than 5 characters long!",
-            )
-
-        charset_list = [*string.ascii_letters, *string.digits, *string.printable[62:-6]]
-        if any(letter not in charset_list for letter in value):
-            raise serializers.ValidationError(
-                "Your nickname must not contain invalid characters (only letters, numbers and symbols)!",
-            )
-
-    def validate_password(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError(
-                "Your nickname must not be less than 8 characters long!",
-            )
-
-        charset_list = [*string.ascii_letters, *string.digits, *string.printable[62:-6]]
-        if any(letter not in charset_list for letter in value):
-            raise serializers.ValidationError(
-                "Your password must not contain invalid characters (only letters, numbers and symbols)!",
+                'Your nickname cannot be empty'
             )
 
 
@@ -86,7 +59,7 @@ class TaskSerializer(serializers.ModelSerializer):
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
-        fields = '__all__'
+        fields = ['name']
 
     def validate_name(self, value):
         charset_list = [*string.ascii_letters, *string.digits, *string.printable[62:-6]]

@@ -1,13 +1,13 @@
 from django.db import models
+from django.contrib.auth.models import User
 import datetime
 
 
-class User(models.Model):
-    id = models.IntegerField().primary_key
-    login = models.CharField(max_length=50, blank=False, null=False)
-    password = models.CharField(max_length=32, blank=False, null=False)
-    sign_up_date = models.DateField(default=datetime.date.today, null=False)
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     nickname = models.CharField(max_length=30, blank=False, null=False)
+    avatar = models.ImageField(upload_to='media/avatars', default='media/default-avatar/avatar1.png')
+    bio = models.TextField()
 
 
 class Room(models.Model):
