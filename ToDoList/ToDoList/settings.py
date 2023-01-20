@@ -82,16 +82,6 @@ DATABASES = {
         'HOST': 'localhost',
         'USER': 'root',
     }
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'maruszewskiw',
-    #     'USER': 'student',
-    #     'PASSWORD': 'WHaaT20##.!',
-    #     'HOST': '213.184.8.36',
-    #     'PORT': '22'
-    #     # 'PORT': '3306',
-    #     # 'PORT': '443',
-    # }
 }
 
 
@@ -139,9 +129,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_PARSER_CLASSES': [
-        'rest_framework.parsers.JSONParser',
-    ],
+    # 'DEFAULT_PARSER_CLASSES': [
+    #     'rest_framework.parsers.JSONParser',
+    # ],
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
