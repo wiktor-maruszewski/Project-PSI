@@ -1,72 +1,142 @@
-import string
-from datetime import datetime
 from rest_framework import serializers
-from ToDoApp.models import Task, Category, Room, UserRoom, Profile
+from .models import Task, Category, Room, Profile
 from django.contrib.auth.models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = '__all__'
+class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+    username = serializers.StringRelatedField(source='user.username')
+    user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail')
 
-
-class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['user', 'nickname', 'avatar', 'bio']
-
-    # def validate_nickname(self, value):
-    #     if not value:
-    #         raise serializers.ValidationError(
-    #             'Your nickname cannot be empty'
-    #         )
+        fields = ('nickname', 'avatar', 'bio', 'username', 'user')
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(view_name='category-detail', read_only=True)
+    room_name = serializers.CharField(source='room.name', read_only=True)
+    room = serializers.HyperlinkedRelatedField(view_name='room-detail', queryset=Room.objects.all())
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'is_payment', 'room_id']
-
-    # def validate_name(self, value):
-    #     if not value:
-    #         value = 'General'
-    #     charset_list = [*string.ascii_letters, *string.digits, *string.printable[62:-6]]
-    #     if any(letter not in charset_list for letter in value):
-    #         raise serializers.ValidationError(
-    #             "Your category name must not contain invalid characters (only letters, numbers and symbols)!",
-    #         )
+        fields = ('url', 'name', 'room_name', 'room', 'is_payment')
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskSerializer(serializers.HyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='task-detail', read_only=True)
+    room = serializers.HyperlinkedIdentityField(view_name='room-detail')
+
+    created_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    category = serializers.HyperlinkedRelatedField(
+        queryset=Category.objects.all(),
+        view_name='category-detail',
+    )
+
     class Meta:
         model = Task
-        fields = '__all__'
-
-    def validate_date(self):
-        if self.get_value('start_time') < datetime.today():
-            raise serializers.ValidationError(
-                "The task start time cannot be set before the current time.")
-
-        if self.data.get('start_time') < self.data.get('end_time'):
-            raise serializers.ValidationError(
-                "The task end time cannot be set before the start time.")
+        fields = ('url', 'room', 'category', 'description', 'start_time', 'end_time', 'is_important', 'is_completed', 'completed_by',
+                  'created_by', 'completion_time', 'completion_comment')
 
 
-class RoomSerializer(serializers.ModelSerializer):
+class RoomListSerializer(serializers.ModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(view_name='room-detail', read_only=True)
+
+    categories = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='category-detail',
+        read_only=True,
+        source='category_set'
+    )
+
+    creator = serializers.HyperlinkedRelatedField(
+        view_name='user-detail',
+        read_only=True
+    )
+    can_create_task = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='user-detail',
+        read_only=True
+    )
+    can_finish_task = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        many=True,
+        view_name='user-detail',
+    )
+    is_moderator = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='user-detail',
+        read_only=True
+    )
+    user_room = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='user-detail',
+        queryset=User.objects.all(),
+    )
+
+    creator_username = serializers.CharField(source='creator.username', read_only=True)
+
     class Meta:
         model = Room
-        fields = ['id', 'name', 'creator_id']
-    #
-    # def validate_name(self, value):
-    #     charset_list = [*string.ascii_letters, *string.digits, *string.printable[62:-6]]
-    #     if any(letter not in charset_list for letter in value):
-    #         raise serializers.ValidationError(
-    #             "Your room name must not contain invalid characters (only letters, numbers and symbols)!",
-    #         )
+        fields = ('url', 'name', 'creator_username', 'creator', 'can_create_task', 'can_finish_task', 'is_moderator', 'user_room', 'categories')
 
 
-class UserRoomSerializer(serializers.ModelSerializer):
+class RoomDetailSerializer(serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(view_name='room-detail', read_only=True)
+
+    categories = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='category-detail',
+        read_only=True,
+        source='category_set'
+    )
+
+    creator = serializers.HyperlinkedRelatedField(
+        view_name='user-detail',
+        read_only=True
+    )
+
+    can_create_task = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='user-detail',
+        queryset=User.objects.all(),
+    )
+
+    can_finish_task = serializers.HyperlinkedRelatedField(
+        queryset=User.objects.all(),
+        many=True,
+        view_name='user-detail',
+    )
+
+    is_moderator = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='user-detail',
+        queryset=User.objects.all(),
+    )
+
+    user_room = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='user-detail',
+        queryset=User.objects.all(),
+    )
+
+    creator_username = serializers.CharField(source='creator.username', read_only=True)
+
     class Meta:
-        model = UserRoom
-        fields = ['user_id', 'room_id', 'is_admin', 'can_create_task', 'can_finish_task']
+        model = Room
+        fields = ('url', 'name', 'creator_username', 'creator', 'can_create_task', 'can_finish_task', 'is_moderator', 'user_room', 'categories')
+
+
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    tasks = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    categories = CategorySerializer(many=True, read_only=True)
+    rooms = RoomListSerializer(many=True, read_only=True)
+    profile = ProfileSerializer(read_only=True)
+    profile_url = serializers.HyperlinkedRelatedField(source='profile', read_only=True, view_name='profile-detail')
+
+    class Meta:
+        model = User
+        fields = ['url', 'pk', 'username', 'email', 'password', 'profile', 'profile_url', 'tasks', 'categories', 'rooms']

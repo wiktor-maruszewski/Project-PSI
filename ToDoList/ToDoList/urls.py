@@ -19,6 +19,7 @@ from django.urls import path, include, re_path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ToDoApp/', include('ToDoApp.urls')),
+    path('__debug__/', include('debug_toolbar.urls')),
     re_path(r'^api-auth/', include('rest_framework.urls'))
 ]
 
