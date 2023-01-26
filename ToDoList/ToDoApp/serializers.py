@@ -23,7 +23,7 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
         fields = ('url', 'name', 'room_name', 'room', 'is_payment')
 
 
-class TaskSerializer(serializers.HyperlinkedModelSerializer):
+class TaskListSerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='task-detail', read_only=True)
     room = serializers.HyperlinkedIdentityField(view_name='room-detail')
 
@@ -36,8 +36,23 @@ class TaskSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('url', 'room', 'category', 'description', 'start_time', 'end_time', 'is_important', 'is_completed', 'completed_by',
-                  'created_by', 'completion_time', 'completion_comment')
+        fields = ('url', 'room', 'category', 'description', 'start_time', 'end_time', 'is_important', 'created_by')
+
+
+class TaskDetailSerializer(serializers.HyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='task-detail', read_only=True)
+    room = serializers.HyperlinkedIdentityField(view_name='room-detail')
+
+    created_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    category = serializers.HyperlinkedRelatedField(
+        queryset=Category.objects.all(),
+        view_name='category-detail',
+    )
+
+    class Meta:
+        model = Task
+        fields = ('url', 'room', 'category', 'description', 'start_time', 'end_time', 'is_important', 'is_completed','completed_by', 'created_by', 'completion_time', 'completion_comment')
 
 
 class RoomListSerializer(serializers.ModelSerializer):

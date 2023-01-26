@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.reverse import reverse
 from rest_framework.response import Response
 from .models import Profile, Task, Room, Category
-from .serializers import ProfileSerializer, TaskSerializer, RoomListSerializer, RoomDetailSerializer, CategorySerializer, UserSerializer
+from .serializers import ProfileSerializer, TaskListSerializer, TaskDetailSerializer, RoomListSerializer, RoomDetailSerializer, CategorySerializer, UserSerializer
 from django.contrib.auth.models import User
 
 
@@ -23,7 +23,7 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class TaskList(generics.ListCreateAPIView):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    serializer_class = TaskListSerializer
     name = 'task-list'
 
     def perform_create(self, serializer):
@@ -32,7 +32,7 @@ class TaskList(generics.ListCreateAPIView):
 
 class TaskDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    serializer_class = TaskDetailSerializer
     name = 'task-detail'
 
 
