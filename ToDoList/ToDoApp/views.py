@@ -1,6 +1,8 @@
 from rest_framework import generics
 from rest_framework.reverse import reverse
 from rest_framework.response import Response
+
+from . import models
 from .models import Profile, Task, Room, Category
 from .serializers import ProfileSerializer, TaskListSerializer, TaskDetailSerializer, RoomListSerializer, RoomDetailSerializer, CategorySerializer, UserSerializer
 from django.contrib.auth.models import User

@@ -56,7 +56,7 @@ class Task(models.Model):
     is_completed = models.BooleanField(default=False, blank=True, null=True)
     completed_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='completed_by')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_by')
-    completion_time = models.DateTimeField(default=datetime.now, blank=True, null=True)
+    completion_time = models.DateTimeField(blank=True, null=True)
     completion_comment = models.TextField(blank=True, null=True)
 
     class Meta:
