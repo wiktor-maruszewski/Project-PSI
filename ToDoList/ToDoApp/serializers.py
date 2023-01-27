@@ -8,12 +8,13 @@ from django.contrib.auth.models import User
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='profile-detail', read_only=True)
     username = serializers.StringRelatedField(source='user.username')
     user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail')
 
     class Meta:
         model = Profile
-        fields = ('nickname', 'avatar', 'bio', 'username', 'user')
+        fields = ('url', 'nickname', 'avatar', 'bio', 'username', 'user')
 
     def validate_nickname(self, value):
         charset_list = [*string.ascii_letters, *string.digits, *string.printable[62:-6]]
@@ -21,10 +22,10 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
             raise serializers.ValidationError(
                 "Your nickname must not contain invalid characters (only letters, numbers and symbols)!",
             )
+        return value
 
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
-
     url = serializers.HyperlinkedIdentityField(view_name='category-detail', read_only=True)
     room_name = serializers.CharField(source='room.name', read_only=True)
     room = serializers.HyperlinkedRelatedField(queryset=Room.objects.all(), view_name='room-detail')
@@ -105,7 +106,9 @@ class TaskDetailSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('url', 'category', 'created_by', 'description', 'start_time', 'end_time', 'is_important', 'is_completed', 'completed_by', 'completion_time', 'completion_comment')
+        fields = (
+            'url', 'category', 'created_by', 'description', 'start_time', 'end_time', 'is_important', 'is_completed',
+            'completed_by', 'completion_time', 'completion_comment')
 
 
 class RoomListSerializer(serializers.ModelSerializer):
@@ -117,25 +120,30 @@ class RoomListSerializer(serializers.ModelSerializer):
         read_only=True,
         source='category_set'
     )
+
     creator = serializers.HyperlinkedRelatedField(
         view_name='user-detail',
         read_only=True
     )
+
     can_create_task = serializers.HyperlinkedRelatedField(
         many=True,
         view_name='user-detail',
         read_only=True
     )
+
     can_finish_task = serializers.HyperlinkedRelatedField(
         read_only=True,
         many=True,
         view_name='user-detail',
     )
+
     is_moderator = serializers.HyperlinkedRelatedField(
         many=True,
         view_name='user-detail',
         read_only=True
     )
+
     user_room = serializers.HyperlinkedRelatedField(
         many=True,
         view_name='user-detail',
@@ -155,8 +163,9 @@ class RoomListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = (
-        'url', 'name', 'creator_username', 'creator', 'can_create_task', 'can_finish_task', 'is_moderator', 'user_room',
-        'categories')
+            'url', 'name', 'creator_username', 'creator', 'can_create_task', 'can_finish_task', 'is_moderator',
+            'user_room',
+            'categories')
 
 
 class RoomDetailSerializer(serializers.HyperlinkedModelSerializer):
@@ -232,8 +241,9 @@ class RoomDetailSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Room
         fields = (
-        'url', 'name', 'creator_username', 'creator', 'can_create_task', 'can_finish_task', 'is_moderator', 'user_room',
-        'categories')
+            'url', 'name', 'creator_username', 'creator', 'can_create_task', 'can_finish_task', 'is_moderator',
+            'user_room',
+            'categories')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -247,7 +257,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         password = make_password(validated_data['password'])
         validated_data['password'] = password
         return super().create(validated_data)
-
 
     def update(self, instance, validated_data):
         password = make_password(validated_data['password'])
